@@ -1,0 +1,32 @@
+library(pacman)
+pacman::p_load('dplyr', 'tidyr', 'gapminder',
+               'ggplot2',  'ggalt',
+               'forcats', 'R.utils', 'png', 
+               'grid', 'ggpubr', 'scales',
+               'bbplot')
+library(ggchicklet)
+library(ggtext)
+library(forcats)
+library(grid)
+
+facet <- cces_approval_race %>%
+  group_by(race, year) 
+
+facet_plot <- ggplot() +
+  geom_area(data = facet, aes(x = year, y = rate, fill = race)) +
+  scale_fill_manual(values = c("#1380A1", "#FAAB18","#990000", "#588300", "#32CD32", "#B19CD9", "#FFFF00", "#000080")) + 
+  facet_wrap( ~ race, ncol = 4) + 
+  scale_x_continuous(breaks = c(2017, 2018, 2019),
+                     labels = c("2017", "2018", "2019")) +
+  scale_y_continuous(breaks = c(0, 30, 60),
+                     labels = c(0, "30%", "60%")) +
+  bbc_style() +
+  geom_hline(yintercept = 0, size = 1, colour = "#333333") +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        plot.caption = element_markdown(hjust = 0, size = 11, margin = unit(c(0, 0, 0, 0), "cm"), color = "#718c9e")) +
+  labs(title = "Racial Differences in American Politics",
+       subtitle = "Trump's Approval by Race/Ethnicity, 2017-2019",
+       caption = "Source: Cooperative Congressional Election Study, 2006-2019.") 
+
+plot(facet_plot)
