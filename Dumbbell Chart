@@ -1,0 +1,66 @@
+library(pacman)
+pacman::p_load('dplyr', 'tidyr', 'gapminder',
+               'ggplot2',  'ggalt',
+               'forcats', 'R.utils', 'png', 
+               'grid', 'ggpubr', 'scales',
+               'bbplot')
+library(plotly)
+library("ggalt")
+library("tidyr")
+library(grid)
+library(tidyverse)
+library(readxl)
+library(ggalt)
+
+theme_clean <- theme_bw(base_family="Calibri") + 
+  theme(legend.position = "top",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        plot.title = element_text(size = 18, face = "bold"),
+        plot.subtitle = element_text(size = 12, face = "italic", margin = margin(b=12)),
+        plot.caption = element_text(size = 10),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank())
+theme_set(theme_clean)
+
+percent_calc <- function(x) {
+  x <- paste0(x*100)
+  x
+}
+
+cces_net_approval_state$state <- factor(cces_net_approval_state$state, 
+                                        levels=rev(cces_net_approval_state$state))
+cces_net_approval_state <- cces_net_approval_state %>% 
+   mutate(Sgn = sign(net2019 - net2017 + 0.005))
+
+cces_state_gg <- ggplot(cces_net_approval_state, aes(y=state, x=net2019, xend=net2017)) + 
+  geom_dumbbell(size=3, color="#8AB0BD", 
+                colour_x = "#EE7523", 
+                colour_xend = "#6D3A5D",
+                dot_guide=FALSE) +
+  geom_text(data=filter(cces_net_approval_state,
+                        state=="Idaho"),
+            aes(x=net2019, y=state, label="2019"),
+            color="#EE7523", size=5, vjust=-2,
+            fontface="bold", family="Helvetica") + 
+  geom_text(data=filter(cces_net_approval_state, 
+                        state=="Idaho"), 
+            aes(x=net2017, y=state, label="2017"), 
+            color="#6D3A5D", size=5, vjust=-2,
+            fontface="bold", family="Helvetica") + 
+  labs(x="", y="",
+       title = "Change in Presidential Approval (%) in the US States, Trump Years (2017-2019)",
+       subtitle = "Idaho saw the biggest increase in support for Trump while Nebraska saw the biggest decline.",
+       caption = "Source: Cooperation Congressional Research Service (CCES). ") + 
+  scale_y_discrete(expand = c(0.1, 0)) + 
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1), 
+                     limits = c(0.1,0.80)) + 
+  geom_text(data=cces_net_approval_state, 
+            aes(x=net2019, y=state, label=percent_calc(net2019)),
+            color="#EE7523", size=2, 
+            hjust=-cces_net_approval_state$Sgn*2, family="Helvetica") + 
+  geom_text(data=cces_net_approval_state, 
+            aes(x=net2017, y=state, label=percent_calc(net2017)),
+            color="#6D3A5D", size=2, 
+            hjust=cces_net_approval_state$Sgn*2, family="Helvetica")
