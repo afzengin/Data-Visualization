@@ -66,3 +66,4 @@ multiple_line + theme(legend.position = "none",
                       label.size = NA, 
                       family="Helvetica", 
                       size = 5)
+
